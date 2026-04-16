@@ -1,0 +1,29 @@
+# Credenciales y secretos
+config/.env
+config/oauth/*.json
+*.pem
+*.key
+*.p12
+
+# Tokens OAuth
+token.json
+tokens/
+
+# Node
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
