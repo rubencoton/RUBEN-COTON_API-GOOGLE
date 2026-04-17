@@ -40,6 +40,18 @@ async function main() {
     { name: 'YouTube', fn: () => services.youtube.channels.list({ part: 'id', mine: true }) },
     { name: 'People', fn: () => services.people.people.get({ resourceName: 'people/me', personFields: 'names' }) },
     { name: 'Tasks', fn: () => services.tasks.tasklists.list({ maxResults: 1 }) },
+    { name: 'Slides', fn: () => services.slides.presentations.get({ presentationId: 'test' }).catch(e => {
+      if (e.code === 404 || e.code === 400) return { data: { reachable: true } };
+      throw e;
+    }) },
+    { name: 'Docs', fn: () => services.docs.documents.get({ documentId: 'test' }).catch(e => {
+      if (e.code === 404 || e.code === 400) return { data: { reachable: true } };
+      throw e;
+    }) },
+    { name: 'Forms', fn: () => services.forms.forms.get({ formId: 'test' }).catch(e => {
+      if (e.code === 404 || e.code === 400) return { data: { reachable: true } };
+      throw e;
+    }) },
   ];
 
   console.log('Probando APIs...\n');

@@ -88,6 +88,9 @@ async function getServices() {
     youtube: google.youtube({ version: 'v3', auth }),
     people: google.people({ version: 'v1', auth }),
     tasks: google.tasks({ version: 'v1', auth }),
+    slides: google.slides({ version: 'v1', auth }),
+    docs: google.docs({ version: 'v1', auth }),
+    forms: google.forms({ version: 'v1', auth }),
   };
 }
 

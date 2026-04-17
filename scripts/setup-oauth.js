@@ -25,6 +25,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/tasks',
   'https://www.googleapis.com/auth/forms',
   'https://www.googleapis.com/auth/presentations',
+  'https://www.googleapis.com/auth/documents',
   'https://www.googleapis.com/auth/analytics.readonly',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/userinfo.email',
