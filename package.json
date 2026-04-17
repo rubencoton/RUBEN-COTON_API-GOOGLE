@@ -1,0 +1,33 @@
+{
+  "name": "ruben-coton-api-google",
+  "version": "1.0.0",
+  "description": "Hub central de conexiones API Google para manager@rubencoton.com",
+  "main": "src/index.js",
+  "scripts": {
+    "test:connection": "node scripts/test-connection.js",
+    "oauth:setup": "node scripts/setup-oauth.js",
+    "audit:credentials": "node scripts/audit-credentials.js"
+  },
+  "keywords": [
+    "google",
+    "api",
+    "oauth",
+    "gmail",
+    "drive",
+    "sheets",
+    "calendar",
+    "youtube",
+    "ruben-coton"
+  ],
+  "author": "RUBEN COTON <manager@rubencoton.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "googleapis": "^144.0.0",
+    "google-auth-library": "^9.14.0",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
