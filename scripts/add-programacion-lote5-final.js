@@ -1,0 +1,280 @@
+const { getServices } = require('../src/auth/oauth-manager');
+
+const SPREADSHEET_ID = '1ufYMIn2zwvyhZi0_Crf28mLL-H1I7ezjm4GGOMZ3cWA';
+
+// Helper ayuntamiento
+function ay(municipio, provincia, ccaa, telefono, web, email) {
+  return [
+    `Ayuntamiento ${municipio}`,
+    'Admin Pública',
+    municipio,
+    ccaa,
+    `Fiestas patronales ${municipio}`,
+    'Mediano',
+    telefono,
+    email || `cultura@${web}`,
+    web,
+    `Concejalía ${provincia}`
+  ];
+}
+
+// LOTE 5 FINAL - Más ayuntamientos pueblos pequeños/medianos + diputaciones
+const LOTE5 = [
+  // ============ MÁS AYUNTAMIENTOS MADRID ============
+  ay('Tres Cantos', 'Madrid', 'Madrid', '+34 91 293 80 00', 'trescantos.es', 'cultura@trescantos.es'),
+  ay('San Fernando de Henares', 'Madrid', 'Madrid', '+34 91 627 31 00', 'ayto-sanfernando.com', 'cultura@ayto-sanfernando.com'),
+  ay('San Sebastián de los Reyes', 'Madrid', 'Madrid', '+34 91 659 71 00', 'ssreyes.org', 'cultura@ssreyes.org'),
+  ay('Alcobendas', 'Madrid', 'Madrid', '+34 91 484 65 00', 'aytoalcobendas.org', 'cultura@aytoalcobendas.org'),
+  ay('Rivas-Vaciamadrid', 'Madrid', 'Madrid', '+34 91 670 00 00', 'rivasciudad.es', 'cultura@rivasciudad.es'),
+  ay('Boadilla del Monte', 'Madrid', 'Madrid', '+34 91 632 04 04', 'aytoboadilla.com', 'cultura@aytoboadilla.com'),
+  ay('Majadahonda', 'Madrid', 'Madrid', '+34 91 634 91 00', 'majadahonda.org', 'cultura@majadahonda.org'),
+  ay('Torrejón de Ardoz', 'Madrid', 'Madrid', '+34 91 678 95 00', 'ayto-torrejon.es', 'cultura@ayto-torrejon.es'),
+  ay('Parla', 'Madrid', 'Madrid', '+34 91 624 03 00', 'ayuntamientoparla.es', 'cultura@ayuntamientoparla.es'),
+  ay('Collado Villalba', 'Madrid', 'Madrid', '+34 91 851 23 00', 'ayto-colladovillalba.org', 'cultura@ayto-colladovillalba.org'),
+  ay('Arganda del Rey', 'Madrid', 'Madrid', '+34 91 871 13 44', 'ayto-arganda.es', 'cultura@ayto-arganda.es'),
+  ay('Cercedilla', 'Madrid', 'Madrid', '+34 91 852 27 00', 'cercedilla.es', 'cultura@cercedilla.es'),
+  ay('Buitrago del Lozoya', 'Madrid', 'Madrid', '+34 91 868 00 56', 'buitragodellozoya.es', 'cultura@buitragodellozoya.es'),
+  ay('Chinchón', 'Madrid', 'Madrid', '+34 91 894 00 04', 'chinchon.es', 'cultura@chinchon.es'),
+  ay('Manzanares el Real', 'Madrid', 'Madrid', '+34 91 853 00 09', 'manzanareselreal.es', 'cultura@manzanareselreal.es'),
+
+  // ============ MÁS PUEBLOS ANDALUCÍA ============
+  ay('Jaén Capital', 'Jaén', 'Andalucía', '+34 95 321 91 00', 'aytojaen.es', 'cultura@aytojaen.es'),
+  ay('La Carolina', 'Jaén', 'Andalucía', '+34 95 366 11 00', 'lacarolina.es', 'cultura@lacarolina.es'),
+  ay('Mengíbar', 'Jaén', 'Andalucía', '+34 95 337 04 03', 'mengibar.es', 'cultura@mengibar.es'),
+  ay('Bailén', 'Jaén', 'Andalucía', '+34 95 367 81 00', 'bailen.es', 'cultura@bailen.es'),
+  ay('Pozoblanco', 'Córdoba', 'Andalucía', '+34 95 777 04 00', 'pozoblanco.es', 'cultura@pozoblanco.es'),
+  ay('Montilla', 'Córdoba', 'Andalucía', '+34 95 765 01 50', 'montilla.es', 'cultura@montilla.es'),
+  ay('Rute', 'Córdoba', 'Andalucía', '+34 95 753 80 60', 'rute.es', 'cultura@rute.es'),
+  ay('Camas', 'Sevilla', 'Andalucía', '+34 95 539 55 00', 'aytocamas.es', 'cultura@aytocamas.es'),
+  ay('Coria del Río', 'Sevilla', 'Andalucía', '+34 95 477 00 50', 'coriadelrio.es', 'cultura@coriadelrio.es'),
+  ay('Tomares', 'Sevilla', 'Andalucía', '+34 95 415 87 00', 'tomares.es', 'cultura@tomares.es'),
+  ay('Bormujos', 'Sevilla', 'Andalucía', '+34 95 472 41 00', 'bormujos.es', 'cultura@bormujos.es'),
+  ay('San Juan de Aznalfarache', 'Sevilla', 'Andalucía', '+34 95 417 86 00', 'sanjuandeaznalfarache.es', 'cultura@sanjuandeaznalfarache.es'),
+  ay('Espera', 'Cádiz', 'Andalucía', '+34 95 672 50 18', 'aytoespera.es', 'cultura@aytoespera.es'),
+  ay('Olvera', 'Cádiz', 'Andalucía', '+34 95 613 04 80', 'olvera.es', 'cultura@olvera.es'),
+  ay('Vejer de la Frontera', 'Cádiz', 'Andalucía', '+34 95 645 07 92', 'vejer.es', 'cultura@vejer.es'),
+  ay('Coín', 'Málaga', 'Andalucía', '+34 95 245 30 50', 'coin.es', 'cultura@coin.es'),
+  ay('Alhaurín de la Torre', 'Málaga', 'Andalucía', '+34 95 241 71 50', 'alhaurindelatorre.es', 'cultura@alhaurindelatorre.es'),
+  ay('Cártama', 'Málaga', 'Andalucía', '+34 95 242 21 95', 'cartama.es', 'cultura@cartama.es'),
+  ay('Alhama de Granada', 'Granada', 'Andalucía', '+34 95 836 00 11', 'alhamadegranada.es', 'cultura@alhamadegranada.es'),
+  ay('Atarfe', 'Granada', 'Andalucía', '+34 95 843 60 13', 'atarfe.es', 'cultura@atarfe.es'),
+  ay('Maracena', 'Granada', 'Andalucía', '+34 95 842 00 96', 'maracena.es', 'cultura@maracena.es'),
+  ay('Berja', 'Almería', 'Andalucía', '+34 95 049 09 18', 'berja.es', 'cultura@berja.es'),
+  ay('Cuevas del Almanzora', 'Almería', 'Andalucía', '+34 95 045 60 36', 'cuevasdelalmanzora.org', 'cultura@cuevasdelalmanzora.org'),
+  ay('Lepe', 'Huelva', 'Andalucía', '+34 95 938 30 50', 'lepe.es', 'cultura@lepe.es'),
+  ay('Ayamonte', 'Huelva', 'Andalucía', '+34 95 932 02 53', 'ayamonte.es', 'cultura@ayamonte.es'),
+  ay('Isla Cristina', 'Huelva', 'Andalucía', '+34 95 933 11 00', 'islacristina.org', 'cultura@islacristina.org'),
+  ay('Punta Umbría', 'Huelva', 'Andalucía', '+34 95 939 09 11', 'puntaumbria.es', 'cultura@puntaumbria.es'),
+
+  // ============ MÁS PUEBLOS VALENCIA ============
+  ay('Onteniente', 'Valencia', 'Comunidad Valenciana', '+34 96 291 88 00', 'ontinyent.es', 'cultura@ontinyent.es'),
+  ay('Algemesí', 'Valencia', 'Comunidad Valenciana', '+34 96 201 90 00', 'algemesi.es', 'cultura@algemesi.es'),
+  ay('Alzira', 'Valencia', 'Comunidad Valenciana', '+34 96 240 04 50', 'alzira.es', 'cultura@alzira.es'),
+  ay('Carcagente', 'Valencia', 'Comunidad Valenciana', '+34 96 290 31 00', 'carcaixent.es', 'cultura@carcaixent.es'),
+  ay('Sueca', 'Valencia', 'Comunidad Valenciana', '+34 96 170 00 50', 'sueca.es', 'cultura@sueca.es'),
+  ay('Cullera', 'Valencia', 'Comunidad Valenciana', '+34 96 173 00 30', 'cullera.es', 'cultura@cullera.es'),
+  ay('Oliva', 'Valencia', 'Comunidad Valenciana', '+34 96 285 02 00', 'olivaturismo.com', 'cultura@oliva.es'),
+  ay('Carlet', 'Valencia', 'Comunidad Valenciana', '+34 96 219 90 00', 'carlet.es', 'cultura@carlet.es'),
+  ay('Játiva', 'Valencia', 'Comunidad Valenciana', '+34 96 222 80 50', 'xativa.es', 'cultura@xativa.es'),
+  ay('Requena', 'Valencia', 'Comunidad Valenciana', '+34 96 230 38 50', 'requena.es', 'cultura@requena.es'),
+  ay('Utiel', 'Valencia', 'Comunidad Valenciana', '+34 96 217 14 00', 'utiel.es', 'cultura@utiel.es'),
+  ay('Vila-real', 'Castellón', 'Comunidad Valenciana', '+34 96 454 70 00', 'vila-real.es', 'cultura@vila-real.es'),
+  ay('Burriana', 'Castellón', 'Comunidad Valenciana', '+34 96 451 96 00', 'burriana.es', 'cultura@burriana.es'),
+  ay('Vinaròs', 'Castellón', 'Comunidad Valenciana', '+34 96 445 30 02', 'vinaros.es', 'cultura@vinaros.es'),
+  ay('Benicarló', 'Castellón', 'Comunidad Valenciana', '+34 96 447 00 50', 'benicarlo.org', 'cultura@benicarlo.org'),
+  ay('Onda', 'Castellón', 'Comunidad Valenciana', '+34 96 460 02 50', 'onda.es', 'cultura@onda.es'),
+  ay('Almazora', 'Castellón', 'Comunidad Valenciana', '+34 96 456 02 50', 'almassora.es', 'cultura@almassora.es'),
+  ay('Petrer', 'Alicante', 'Comunidad Valenciana', '+34 96 698 94 00', 'petrer.es', 'cultura@petrer.es'),
+  ay('Elda', 'Alicante', 'Comunidad Valenciana', '+34 96 538 04 02', 'elda.es', 'cultura@elda.es'),
+  ay('Crevillente', 'Alicante', 'Comunidad Valenciana', '+34 96 540 25 60', 'crevillent.es', 'cultura@crevillent.es'),
+  ay('Aspe', 'Alicante', 'Comunidad Valenciana', '+34 96 549 60 50', 'aspe.es', 'cultura@aspe.es'),
+  ay('Torrevieja', 'Alicante', 'Comunidad Valenciana', '+34 96 571 12 00', 'torrevieja.es', 'cultura@torrevieja.es'),
+  ay('Orihuela', 'Alicante', 'Comunidad Valenciana', '+34 96 673 68 64', 'orihuela.es', 'cultura@orihuela.es'),
+  ay('Pilar de la Horadada', 'Alicante', 'Comunidad Valenciana', '+34 96 678 00 14', 'pilardelahoradada.org', 'cultura@pilardelahoradada.org'),
+  ay('Santa Pola', 'Alicante', 'Comunidad Valenciana', '+34 96 541 70 22', 'santapola.es', 'cultura@santapola.es'),
+
+  // ============ MÁS PUEBLOS CATALUÑA ============
+  ay('Manlleu', 'Barcelona', 'Cataluña', '+34 93 850 66 66', 'manlleu.cat', 'cultura@manlleu.cat'),
+  ay('Sant Joan Despí', 'Barcelona', 'Cataluña', '+34 93 480 60 00', 'sjdespi.com', 'cultura@sjdespi.com'),
+  ay('Pineda de Mar', 'Barcelona', 'Cataluña', '+34 93 762 90 00', 'pinedademar.org', 'cultura@pinedademar.org'),
+  ay('Prat de Llobregat', 'Barcelona', 'Cataluña', '+34 93 379 00 50', 'aj-elprat.cat', 'cultura@aj-elprat.cat'),
+  ay('Viladecans', 'Barcelona', 'Cataluña', '+34 93 635 18 00', 'viladecans.cat', 'cultura@viladecans.cat'),
+  ay('Sant Boi de Llobregat', 'Barcelona', 'Cataluña', '+34 93 635 12 00', 'santboi.cat', 'cultura@santboi.cat'),
+  ay('Gavà', 'Barcelona', 'Cataluña', '+34 93 263 91 00', 'gava.cat', 'cultura@gava.cat'),
+  ay('Sant Feliu de Llobregat', 'Barcelona', 'Cataluña', '+34 93 685 80 00', 'santfeliu.cat', 'cultura@santfeliu.cat'),
+  ay('Esplugues', 'Barcelona', 'Cataluña', '+34 93 371 33 50', 'esplugues.cat', 'cultura@esplugues.cat'),
+  ay('Montcada i Reixac', 'Barcelona', 'Cataluña', '+34 93 572 64 73', 'montcada.cat', 'cultura@montcada.cat'),
+  ay('Ripollet', 'Barcelona', 'Cataluña', '+34 93 504 60 00', 'ripollet.cat', 'cultura@ripollet.cat'),
+  ay('Cornellà del Terri', 'Girona', 'Cataluña', '+34 97 259 41 02', 'cornellatericrelleu.cat', 'cultura@cornellatericrelleu.cat'),
+
+  // ============ MÁS PUEBLOS GALICIA ============
+  ay('A Estrada', 'Pontevedra', 'Galicia', '+34 98 657 03 30', 'aestrada.gal', 'cultura@aestrada.gal'),
+  ay('Arteixo', 'A Coruña', 'Galicia', '+34 98 160 00 09', 'arteixo.org', 'cultura@arteixo.org'),
+  ay('Betanzos', 'A Coruña', 'Galicia', '+34 98 177 00 11', 'betanzos.gal', 'cultura@betanzos.gal'),
+  ay('Boiro', 'A Coruña', 'Galicia', '+34 98 184 70 80', 'concellodeboiro.gal', 'cultura@concellodeboiro.gal'),
+  ay('Cee', 'A Coruña', 'Galicia', '+34 98 174 56 80', 'concellodecee.gal', 'cultura@concellodecee.gal'),
+  ay('Noia', 'A Coruña', 'Galicia', '+34 98 184 22 00', 'noia.gal', 'cultura@noia.gal'),
+  ay('Ribeira', 'A Coruña', 'Galicia', '+34 98 187 11 50', 'ribeira.gal', 'cultura@ribeira.gal'),
+  ay('Vilalba', 'Lugo', 'Galicia', '+34 98 251 00 53', 'vilalba.org', 'cultura@vilalba.org'),
+  ay('Sarria', 'Lugo', 'Galicia', '+34 98 253 25 47', 'sarria.gal', 'cultura@sarria.gal'),
+  ay('Burela', 'Lugo', 'Galicia', '+34 98 258 51 00', 'burela.gal', 'cultura@burela.gal'),
+  ay('Carballiño', 'Ourense', 'Galicia', '+34 98 827 04 14', 'carballino.gal', 'cultura@carballino.gal'),
+  ay('Xinzo de Limia', 'Ourense', 'Galicia', '+34 98 845 88 49', 'xinzodelimia.gal', 'cultura@xinzodelimia.gal'),
+  ay('Allariz', 'Ourense', 'Galicia', '+34 98 844 00 01', 'allariz.gal', 'cultura@allariz.gal'),
+
+  // ============ MÁS PUEBLOS NORTE ============
+  ay('Salvaterra de Miño', 'Pontevedra', 'Galicia', '+34 98 665 80 02', 'salvaterradeMino.gal', 'cultura@salvaterradeMino.gal'),
+  ay('Tui', 'Pontevedra', 'Galicia', '+34 98 660 30 25', 'concellotui.org', 'cultura@concellotui.org'),
+  ay('Redondela', 'Pontevedra', 'Galicia', '+34 98 640 10 25', 'redondela.gal', 'cultura@redondela.gal'),
+  ay('Sanxenxo', 'Pontevedra', 'Galicia', '+34 98 669 11 11', 'sanxenxo.gal', 'cultura@sanxenxo.gal'),
+  ay('O Grove', 'Pontevedra', 'Galicia', '+34 98 673 04 75', 'concellodogrove.es', 'cultura@concellodogrove.es'),
+  ay('Cabuérniga', 'Cantabria', 'Cantabria', '+34 94 270 60 01', 'cabuerniga.es', 'cultura@cabuerniga.es'),
+  ay('Comillas', 'Cantabria', 'Cantabria', '+34 94 272 22 91', 'aytocomillas.es', 'cultura@aytocomillas.es'),
+  ay('San Vicente de la Barquera', 'Cantabria', 'Cantabria', '+34 94 271 00 02', 'sanvicentedelabarquera.es', 'cultura@sanvicentedelabarquera.es'),
+  ay('Suances', 'Cantabria', 'Cantabria', '+34 94 281 04 65', 'aytosuances.es', 'cultura@aytosuances.es'),
+  ay('Cabezón de la Sal', 'Cantabria', 'Cantabria', '+34 94 270 19 39', 'cabezondelasal.net', 'cultura@cabezondelasal.net'),
+  ay('Avilés', 'Asturias', 'Asturias', '+34 98 512 21 00', 'aviles.es', 'cultura@aviles.es'),
+  ay('Pravia', 'Asturias', 'Asturias', '+34 98 582 10 00', 'aytopravia.es', 'cultura@aytopravia.es'),
+  ay('Pola de Lena', 'Asturias', 'Asturias', '+34 98 549 21 00', 'aytolena.es', 'cultura@aytolena.es'),
+  ay('Villaviciosa', 'Asturias', 'Asturias', '+34 98 589 10 00', 'aytovillaviciosa.es', 'cultura@aytovillaviciosa.es'),
+  ay('Gozón', 'Asturias', 'Asturias', '+34 98 581 11 50', 'aytogozon.org', 'cultura@aytogozon.org'),
+
+  // ============ MÁS PAÍS VASCO + NAVARRA + ARAGÓN ============
+  ay('Zarautz', 'Gipuzkoa', 'País Vasco', '+34 94 300 51 50', 'zarautz.eus', 'cultura@zarautz.eus'),
+  ay('Bermeo', 'Bizkaia', 'País Vasco', '+34 94 617 91 00', 'bermeo.eus', 'cultura@bermeo.eus'),
+  ay('Lekeitio', 'Bizkaia', 'País Vasco', '+34 94 684 00 84', 'lekeitio.org', 'cultura@lekeitio.org'),
+  ay('Markina-Xemein', 'Bizkaia', 'País Vasco', '+34 94 616 92 75', 'markina-xemein.eus', 'cultura@markina-xemein.eus'),
+  ay('Ondarroa', 'Bizkaia', 'País Vasco', '+34 94 683 00 22', 'ondarroa.eus', 'cultura@ondarroa.eus'),
+  ay('Mungia', 'Bizkaia', 'País Vasco', '+34 94 615 50 90', 'mungia.eus', 'cultura@mungia.eus'),
+  ay('Hondarribia', 'Gipuzkoa', 'País Vasco', '+34 94 364 00 00', 'hondarribia.eus', 'cultura@hondarribia.eus'),
+  ay('Pasaia', 'Gipuzkoa', 'País Vasco', '+34 94 334 40 00', 'pasaia.eus', 'cultura@pasaia.eus'),
+  ay('Beasain', 'Gipuzkoa', 'País Vasco', '+34 94 388 80 50', 'beasain.eus', 'cultura@beasain.eus'),
+  ay('Azpeitia', 'Gipuzkoa', 'País Vasco', '+34 94 315 71 00', 'azpeitia.eus', 'cultura@azpeitia.eus'),
+  ay('Olite', 'Navarra', 'Navarra', '+34 94 874 00 35', 'olite.es', 'cultura@olite.es'),
+  ay('Lodosa', 'Navarra', 'Navarra', '+34 94 869 31 78', 'lodosa.es', 'cultura@lodosa.es'),
+  ay('Lerín', 'Navarra', 'Navarra', '+34 94 853 04 31', 'lerin.es', 'cultura@lerin.es'),
+  ay('Cintruénigo', 'Navarra', 'Navarra', '+34 94 812 00 12', 'cintruenigo.es', 'cultura@cintruenigo.es'),
+  ay('Calatayud', 'Zaragoza', 'Aragón', '+34 97 688 13 14', 'calatayud.es', 'cultura@calatayud.es'),
+  ay('Tarazona', 'Zaragoza', 'Aragón', '+34 97 664 19 18', 'tarazona.es', 'cultura@tarazona.es'),
+  ay('Ejea de los Caballeros', 'Zaragoza', 'Aragón', '+34 97 667 76 56', 'ejea.es', 'cultura@ejea.es'),
+  ay('Jaca', 'Huesca', 'Aragón', '+34 97 436 11 00', 'jaca.es', 'cultura@jaca.es'),
+  ay('Barbastro', 'Huesca', 'Aragón', '+34 97 431 03 50', 'barbastro.org', 'cultura@barbastro.org'),
+  ay('Sabiñánigo', 'Huesca', 'Aragón', '+34 97 484 32 28', 'sabinanigo.es', 'cultura@sabinanigo.es'),
+  ay('Monzón', 'Huesca', 'Aragón', '+34 97 440 38 21', 'monzon.es', 'cultura@monzon.es'),
+  ay('Alcañiz', 'Teruel', 'Aragón', '+34 97 887 05 65', 'alcaniz.es', 'cultura@alcaniz.es'),
+  ay('Andorra', 'Teruel', 'Aragón', '+34 97 888 04 75', 'andorra.es', 'cultura@andorra.es'),
+
+  // ============ MÁS CASTILLAS Y EXTREMADURA ============
+  ay('Mota del Cuervo', 'Cuenca', 'Castilla-La Mancha', '+34 96 718 00 04', 'motadelcuervo.es', 'cultura@motadelcuervo.es'),
+  ay('Tarancón', 'Cuenca', 'Castilla-La Mancha', '+34 96 932 11 50', 'tarancon.es', 'cultura@tarancon.es'),
+  ay('Sigüenza', 'Guadalajara', 'Castilla-La Mancha', '+34 94 939 02 22', 'siguenza.es', 'cultura@siguenza.es'),
+  ay('Azuqueca de Henares', 'Guadalajara', 'Castilla-La Mancha', '+34 94 934 80 33', 'azuqueca.es', 'cultura@azuqueca.es'),
+  ay('Alcázar de San Juan', 'Ciudad Real', 'Castilla-La Mancha', '+34 92 657 91 00', 'alcazardesanjuan.es', 'cultura@alcazardesanjuan.es'),
+  ay('Manzanares', 'Ciudad Real', 'Castilla-La Mancha', '+34 92 661 03 25', 'manzanares.es', 'cultura@manzanares.es'),
+  ay('Valdepeñas', 'Ciudad Real', 'Castilla-La Mancha', '+34 92 631 25 50', 'valdepenas.es', 'cultura@valdepenas.es'),
+  ay('Hellín', 'Albacete', 'Castilla-La Mancha', '+34 96 730 04 50', 'hellin.es', 'cultura@hellin.es'),
+  ay('Almansa', 'Albacete', 'Castilla-La Mancha', '+34 96 734 80 00', 'almansa.es', 'cultura@almansa.es'),
+  ay('Villarrobledo', 'Albacete', 'Castilla-La Mancha', '+34 96 714 16 11', 'villarrobledo.com', 'cultura@villarrobledo.com'),
+  ay('Cabezuela del Valle', 'Cáceres', 'Extremadura', '+34 92 747 20 12', 'cabezueladelvalle.es', 'cultura@cabezueladelvalle.es'),
+  ay('Trujillo', 'Cáceres', 'Extremadura', '+34 92 732 26 77', 'trujillo.es', 'cultura@trujillo.es'),
+  ay('Navalmoral de la Mata', 'Cáceres', 'Extremadura', '+34 92 753 03 50', 'navalmoraldelamata.es', 'cultura@navalmoraldelamata.es'),
+  ay('Olivenza', 'Badajoz', 'Extremadura', '+34 92 449 02 22', 'aytoolivenza.com', 'cultura@aytoolivenza.com'),
+  ay('Zafra', 'Badajoz', 'Extremadura', '+34 92 455 47 02', 'zafra.es', 'cultura@zafra.es'),
+
+  // ============ MÁS CASTILLA Y LEÓN ============
+  ay('Astorga', 'León', 'Castilla y León', '+34 98 761 60 00', 'astorga.org', 'cultura@astorga.org'),
+  ay('La Bañeza', 'León', 'Castilla y León', '+34 98 764 02 24', 'aytobaneza.es', 'cultura@aytobaneza.es'),
+  ay('San Andrés del Rabanedo', 'León', 'Castilla y León', '+34 98 718 41 50', 'aytosanandres.es', 'cultura@aytosanandres.es'),
+  ay('Toro', 'Zamora', 'Castilla y León', '+34 98 010 80 36', 'toroayto.es', 'cultura@toroayto.es'),
+  ay('Benavente', 'Zamora', 'Castilla y León', '+34 98 063 00 00', 'aytobenavente.es', 'cultura@aytobenavente.es'),
+  ay('El Burgo de Osma', 'Soria', 'Castilla y León', '+34 97 534 00 07', 'burgosma.es', 'cultura@burgosma.es'),
+  ay('Almazán', 'Soria', 'Castilla y León', '+34 97 530 02 60', 'almazan.es', 'cultura@almazan.es'),
+  ay('Aranda de Duero Centro', 'Burgos', 'Castilla y León', '+34 94 750 04 04', 'arandadeduero.es', 'cultura@arandadeduero.es'),
+  ay('Briviesca', 'Burgos', 'Castilla y León', '+34 94 759 21 39', 'briviesca.es', 'cultura@briviesca.es'),
+  ay('Lerma', 'Burgos', 'Castilla y León', '+34 94 717 00 02', 'citlerma.com', 'cultura@citlerma.com'),
+  ay('Cuéllar', 'Segovia', 'Castilla y León', '+34 92 114 00 14', 'aytocuellar.es', 'cultura@aytocuellar.es'),
+  ay('San Ildefonso', 'Segovia', 'Castilla y León', '+34 92 147 00 38', 'lagranja-valsain.es', 'cultura@lagranja-valsain.es'),
+  ay('Arévalo', 'Ávila', 'Castilla y León', '+34 92 030 00 04', 'arevalo.es', 'cultura@arevalo.es'),
+  ay('Medina del Campo', 'Valladolid', 'Castilla y León', '+34 98 380 60 18', 'ayto-medinadelcampo.es', 'cultura@ayto-medinadelcampo.es'),
+  ay('Tordesillas', 'Valladolid', 'Castilla y León', '+34 98 377 00 88', 'tordesillas.net', 'cultura@tordesillas.net'),
+  ay('Laguna de Duero', 'Valladolid', 'Castilla y León', '+34 98 354 28 02', 'lagunadeduero.org', 'cultura@lagunadeduero.org'),
+  ay('Béjar', 'Salamanca', 'Castilla y León', '+34 92 340 09 60', 'aytobejar.com', 'cultura@aytobejar.com'),
+  ay('Ciudad Rodrigo', 'Salamanca', 'Castilla y León', '+34 92 346 14 00', 'aytociudadrodrigo.es', 'cultura@aytociudadrodrigo.es'),
+  ay('Peñafiel', 'Valladolid', 'Castilla y León', '+34 98 388 00 00', 'penafiel.es', 'cultura@penafiel.es'),
+
+  // ============ DIPUTACIONES (programan eventos provinciales) ============
+  ['Diputación Madrid', 'Diputación', 'Madrid', 'Madrid', 'Eventos provinciales Madrid', 'Grande', '+34 91 580 12 00', 'cultura@madrid.org', 'comunidad.madrid', 'Diputación'],
+  ['Diputación Barcelona', 'Diputación', 'Barcelona', 'Cataluña', 'Eventos provinciales BCN', 'Grande', '+34 93 402 22 22', 'cultura@diba.cat', 'diba.cat', 'Diputación'],
+  ['Diputación Valencia', 'Diputación', 'Valencia', 'Comunidad Valenciana', 'Eventos provinciales Valencia', 'Grande', '+34 96 388 25 00', 'cultura@dival.es', 'dival.es', 'Diputación'],
+  ['Diputación Sevilla', 'Diputación', 'Sevilla', 'Andalucía', 'Eventos provinciales Sevilla', 'Grande', '+34 95 455 00 00', 'cultura@dipusevilla.es', 'dipusevilla.es', 'Diputación'],
+  ['Diputación Málaga', 'Diputación', 'Málaga', 'Andalucía', 'Eventos provinciales Málaga', 'Grande', '+34 95 213 32 41', 'cultura@malaga.es', 'malaga.es', 'Diputación'],
+  ['Diputación Granada', 'Diputación', 'Granada', 'Andalucía', 'Eventos provinciales Granada', 'Grande', '+34 95 824 71 00', 'cultura@dipgra.es', 'dipgra.es', 'Diputación'],
+  ['Diputación Córdoba', 'Diputación', 'Córdoba', 'Andalucía', 'Eventos provinciales Córdoba', 'Grande', '+34 95 721 11 00', 'cultura@dipucordoba.es', 'dipucordoba.es', 'Diputación'],
+  ['Diputación Cádiz', 'Diputación', 'Cádiz', 'Andalucía', 'Eventos provinciales Cádiz', 'Grande', '+34 95 624 01 00', 'cultura@dipucadiz.es', 'dipucadiz.es', 'Diputación'],
+  ['Diputación Almería', 'Diputación', 'Almería', 'Andalucía', 'Eventos provinciales Almería', 'Grande', '+34 95 021 00 00', 'cultura@dipalme.org', 'dipalme.org', 'Diputación'],
+  ['Diputación Huelva', 'Diputación', 'Huelva', 'Andalucía', 'Eventos provinciales Huelva', 'Grande', '+34 95 949 46 00', 'cultura@diphuelva.es', 'diphuelva.es', 'Diputación'],
+  ['Diputación Jaén', 'Diputación', 'Jaén', 'Andalucía', 'Eventos provinciales Jaén', 'Grande', '+34 95 324 80 00', 'cultura@dipujaen.es', 'dipujaen.es', 'Diputación'],
+  ['Diputación Castellón', 'Diputación', 'Castellón', 'Comunidad Valenciana', 'Eventos provinciales Castellón', 'Grande', '+34 96 435 99 00', 'cultura@dipcas.es', 'dipcas.es', 'Diputación'],
+  ['Diputación Alicante', 'Diputación', 'Alicante', 'Comunidad Valenciana', 'Eventos provinciales Alicante', 'Grande', '+34 96 512 22 22', 'cultura@diputacionalicante.es', 'diputacionalicante.es', 'Diputación'],
+  ['Diputación Tarragona', 'Diputación', 'Tarragona', 'Cataluña', 'Eventos provinciales Tarragona', 'Grande', '+34 97 729 60 00', 'cultura@dipta.cat', 'dipta.cat', 'Diputación'],
+  ['Diputación Lleida', 'Diputación', 'Lleida', 'Cataluña', 'Eventos provinciales Lleida', 'Grande', '+34 97 327 92 00', 'cultura@diputaciolleida.cat', 'diputaciolleida.cat', 'Diputación'],
+  ['Diputación Girona', 'Diputación', 'Girona', 'Cataluña', 'Eventos provinciales Girona', 'Grande', '+34 97 218 50 00', 'cultura@ddgi.cat', 'ddgi.cat', 'Diputación'],
+  ['Diputación Pontevedra', 'Diputación', 'Pontevedra', 'Galicia', 'Eventos provinciales Pontevedra', 'Grande', '+34 98 680 41 00', 'cultura@depo.gal', 'depo.gal', 'Diputación'],
+  ['Diputación A Coruña', 'Diputación', 'A Coruña', 'Galicia', 'Eventos provinciales A Coruña', 'Grande', '+34 98 108 03 00', 'cultura@dacoruna.gal', 'dacoruna.gal', 'Diputación'],
+  ['Diputación Lugo', 'Diputación', 'Lugo', 'Galicia', 'Eventos provinciales Lugo', 'Grande', '+34 98 226 00 00', 'cultura@deputacionlugo.gal', 'deputacionlugo.gal', 'Diputación'],
+  ['Diputación Ourense', 'Diputación', 'Ourense', 'Galicia', 'Eventos provinciales Ourense', 'Grande', '+34 98 838 51 00', 'cultura@depourense.es', 'depourense.es', 'Diputación'],
+  ['Diputación Bizkaia', 'Diputación', 'Bilbao', 'País Vasco', 'Eventos provinciales Bizkaia', 'Grande', '+34 94 406 80 00', 'cultura@bizkaia.eus', 'bizkaia.eus', 'Diputación'],
+  ['Diputación Gipuzkoa', 'Diputación', 'Donostia-San Sebastián', 'País Vasco', 'Eventos provinciales Gipuzkoa', 'Grande', '+34 94 311 21 11', 'cultura@gipuzkoa.eus', 'gipuzkoa.eus', 'Diputación'],
+  ['Diputación Álava', 'Diputación', 'Vitoria-Gasteiz', 'País Vasco', 'Eventos provinciales Álava', 'Grande', '+34 94 518 18 18', 'cultura@araba.eus', 'araba.eus', 'Diputación'],
+  ['Diputación Murcia', 'CCAA Murcia', 'Murcia', 'Murcia', 'Eventos CC.AA. Murcia', 'Grande', '+34 96 836 88 00', 'cultura@carm.es', 'carm.es', 'CC.AA.'],
+  ['Diputación Zaragoza', 'Diputación', 'Zaragoza', 'Aragón', 'Eventos provinciales Zaragoza', 'Grande', '+34 97 676 88 00', 'cultura@dpz.es', 'dpz.es', 'Diputación'],
+  ['Diputación Huesca', 'Diputación', 'Huesca', 'Aragón', 'Eventos provinciales Huesca', 'Grande', '+34 97 429 41 00', 'cultura@dphuesca.es', 'dphuesca.es', 'Diputación'],
+  ['Diputación Teruel', 'Diputación', 'Teruel', 'Aragón', 'Eventos provinciales Teruel', 'Grande', '+34 97 864 71 47', 'cultura@dpteruel.es', 'dpteruel.es', 'Diputación'],
+  ['Diputación León', 'Diputación', 'León', 'Castilla y León', 'Eventos provinciales León', 'Grande', '+34 98 729 22 00', 'cultura@dipuleon.es', 'dipuleon.es', 'Diputación'],
+  ['Diputación Salamanca', 'Diputación', 'Salamanca', 'Castilla y León', 'Eventos provinciales Salamanca', 'Grande', '+34 92 329 31 00', 'cultura@lasalina.es', 'lasalina.es', 'Diputación'],
+  ['Diputación Burgos', 'Diputación', 'Burgos', 'Castilla y León', 'Eventos provinciales Burgos', 'Grande', '+34 94 725 86 00', 'cultura@diputaciondeburgos.es', 'diputaciondeburgos.es', 'Diputación'],
+  ['Diputación Valladolid', 'Diputación', 'Valladolid', 'Castilla y León', 'Eventos provinciales Valladolid', 'Grande', '+34 98 342 71 00', 'cultura@diputaciondevalladolid.es', 'diputaciondevalladolid.es', 'Diputación'],
+  ['Diputación Soria', 'Diputación', 'Soria', 'Castilla y León', 'Eventos provinciales Soria', 'Grande', '+34 97 525 88 80', 'cultura@dipsoria.es', 'dipsoria.es', 'Diputación'],
+  ['Diputación Segovia', 'Diputación', 'Segovia', 'Castilla y León', 'Eventos provinciales Segovia', 'Grande', '+34 92 113 23 00', 'cultura@dipsegovia.es', 'dipsegovia.es', 'Diputación'],
+  ['Diputación Ávila', 'Diputación', 'Ávila', 'Castilla y León', 'Eventos provinciales Ávila', 'Grande', '+34 92 035 70 00', 'cultura@diputacionavila.es', 'diputacionavila.es', 'Diputación'],
+  ['Diputación Palencia', 'Diputación', 'Palencia', 'Castilla y León', 'Eventos provinciales Palencia', 'Grande', '+34 97 971 51 50', 'cultura@diputaciondepalencia.es', 'diputaciondepalencia.es', 'Diputación'],
+  ['Diputación Zamora', 'Diputación', 'Zamora', 'Castilla y León', 'Eventos provinciales Zamora', 'Grande', '+34 98 053 61 50', 'cultura@diputaciondezamora.es', 'diputaciondezamora.es', 'Diputación'],
+  ['Diputación Toledo', 'Diputación', 'Toledo', 'Castilla-La Mancha', 'Eventos provinciales Toledo', 'Grande', '+34 92 525 93 00', 'cultura@diputoledo.es', 'diputoledo.es', 'Diputación'],
+  ['Diputación Ciudad Real', 'Diputación', 'Ciudad Real', 'Castilla-La Mancha', 'Eventos provinciales Ciudad Real', 'Grande', '+34 92 629 21 00', 'cultura@dipucr.es', 'dipucr.es', 'Diputación'],
+  ['Diputación Cuenca', 'Diputación', 'Cuenca', 'Castilla-La Mancha', 'Eventos provinciales Cuenca', 'Grande', '+34 96 921 95 00', 'cultura@dipucuenca.es', 'dipucuenca.es', 'Diputación'],
+  ['Diputación Albacete', 'Diputación', 'Albacete', 'Castilla-La Mancha', 'Eventos provinciales Albacete', 'Grande', '+34 96 752 62 00', 'cultura@dipualba.es', 'dipualba.es', 'Diputación'],
+  ['Diputación Guadalajara', 'Diputación', 'Guadalajara', 'Castilla-La Mancha', 'Eventos provinciales Guadalajara', 'Grande', '+34 94 988 75 00', 'cultura@dguadalajara.es', 'dguadalajara.es', 'Diputación'],
+  ['Diputación Cáceres', 'Diputación', 'Cáceres', 'Extremadura', 'Eventos provinciales Cáceres', 'Grande', '+34 92 725 56 00', 'cultura@dip-caceres.es', 'dip-caceres.es', 'Diputación'],
+  ['Diputación Badajoz', 'Diputación', 'Badajoz', 'Extremadura', 'Eventos provinciales Badajoz', 'Grande', '+34 92 421 24 00', 'cultura@dip-badajoz.es', 'dip-badajoz.es', 'Diputación'],
+  ['Cabildo Tenerife', 'Cabildo Insular', 'Santa Cruz de Tenerife', 'Canarias', 'Eventos Tenerife', 'Grande', '+34 92 223 95 00', 'cultura@tenerife.es', 'tenerife.es', 'Cabildo'],
+  ['Cabildo Gran Canaria', 'Cabildo Insular', 'Las Palmas de Gran Canaria', 'Canarias', 'Eventos Gran Canaria', 'Grande', '+34 92 821 94 00', 'cultura@grancanaria.com', 'grancanaria.com', 'Cabildo'],
+  ['Cabildo Lanzarote', 'Cabildo Insular', 'Arrecife', 'Canarias', 'Eventos Lanzarote', 'Grande', '+34 92 881 01 00', 'cultura@cabildodelanzarote.com', 'cabildodelanzarote.com', 'Cabildo'],
+  ['Cabildo Fuerteventura', 'Cabildo Insular', 'Puerto del Rosario', 'Canarias', 'Eventos Fuerteventura', 'Grande', '+34 92 853 10 00', 'cultura@cabildofuer.es', 'cabildofuer.es', 'Cabildo'],
+  ['Consell de Mallorca', 'Consell Insular', 'Palma', 'Baleares', 'Eventos Mallorca', 'Grande', '+34 97 117 35 00', 'cultura@conselldemallorca.cat', 'conselldemallorca.cat', 'Consell'],
+  ['Consell d\'Eivissa', 'Consell Insular', 'Ibiza', 'Baleares', 'Eventos Eivissa', 'Grande', '+34 97 119 59 00', 'cultura@conselldeivissa.es', 'conselldeivissa.es', 'Consell'],
+  ['Consell de Menorca', 'Consell Insular', 'Maó', 'Baleares', 'Eventos Menorca', 'Grande', '+34 97 135 27 11', 'cultura@cime.es', 'cime.es', 'Consell']
+];
+
+async function add() {
+  try {
+    console.log('🎤 Lote 5 FINAL PROGRAMACION ARTISTAS...\n');
+    console.log(`📊 Nuevas: ${LOTE5.length}\n`);
+
+    const { sheets } = await getServices();
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: SPREADSHEET_ID,
+      range: "'PROGRAMACION ARTISTAS'!A1",
+      valueInputOption: 'RAW',
+      resource: { values: LOTE5 }
+    });
+
+    console.log(`✅ ${LOTE5.length} entries añadidas\n`);
+
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    process.exit(1);
+  }
+}
+
+add();
